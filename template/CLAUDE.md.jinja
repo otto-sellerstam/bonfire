@@ -1,0 +1,93 @@
+# CLAUDE.md
+
+This file provides guidance for Claude (or any AI assistant) working on this project.
+
+## Project Overview
+
+**{{ project_name }}** — {{ description or "A Python project." }}
+
+## Tech Stack
+
+- **Python {{ python_version }}+** with **uv** for package/environment management
+- **Ruff** for linting and formatting (ALL rules enabled)
+- **Pyrefly** for static type checking (strict mode)
+- **Pytest** for testing (with coverage via pytest-cov)
+- **Just** as task runner (install: `cargo install just` or `brew install just`)
+- **Pre-commit** for git hooks
+
+## Key Commands
+
+```bash
+just install       # Install all dependencies
+just setup         # Install deps + pre-commit hooks (first-time setup)
+just check         # Run ALL checks (lint + format + typecheck + test)
+just lint          # Ruff linter
+just lint-fix      # Ruff linter with auto-fix
+just format        # Ruff formatter
+just typecheck     # Pyrefly type checker
+just test          # Pytest
+just test-cov      # Pytest with coverage
+just clean         # Remove caches and build artifacts
+```
+
+Run `just` with no arguments to list all available commands.
+
+## Code Style & Conventions
+
+### Formatting
+- **Ruff** handles all formatting. Run `just format` before committing.
+- Line length: 88 characters (Black-compatible default).
+- Pre-commit hooks auto-format on every commit.
+
+### Linting
+- Ruff is configured with `select = ["ALL"]` — every available rule is enabled.
+- Specific rules are explicitly ignored in `pyproject.toml` with comments explaining why.
+- Docstrings follow **Google style** convention.
+- If you need to suppress a rule, use an inline `# noqa: <CODE>` comment with justification.
+
+### Type Checking
+- **Pyrefly** is the type checker (Meta's Rust-based Python type checker, in beta).
+- Strict mode: all function bodies are checked, return types are inferred.
+- All function parameters MUST have type annotations.
+- Return types are inferred by Pyrefly but explicit annotations are encouraged.
+- `missing-return-annotation` and `missing-override-decorator` errors are enabled.
+- Run `just typecheck` to verify.
+
+### Testing
+- Tests live in `tests/` and use **pytest**.
+- Test files must be named `test_*.py`.
+- Shared fixtures go in `tests/conftest.py`.
+- Use `--strict-markers` and `--strict-config` (configured in pyproject.toml).
+- No type annotations or docstrings are required in test files (per Ruff per-file-ignores).
+- Coverage threshold: 80% (enforced by `tool.coverage.report.fail_under`).
+
+## Project Layout
+
+```
+{{ project_name }}/
+├── src/
+│   └── {{ module_name }}/
+│       ├── __init__.py
+│       └── py.typed            # PEP 561 marker
+├── tests/
+│   ├── __init__.py
+│   ├── conftest.py             # Shared fixtures
+│   └── test_placeholder.py
+├── pyproject.toml              # All tool configuration lives here
+├── justfile                    # Developer commands
+├── .pre-commit-config.yaml     # Pre-commit hooks
+├── .python-version             # Python version pin (uv reads this)
+├── LICENSE
+├── CLAUDE.md                   # This file
+└── .copier-answers.yml         # Copier template metadata (do not edit)
+```
+
+## Before Submitting Code
+
+Always run `just check` which runs all of these in sequence:
+1. `ruff check .` — linting
+2. `ruff format --check .` — format verification
+3. `pyrefly check` — type checking
+4. `pytest` — tests
+
+All four must pass cleanly.
