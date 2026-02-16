@@ -1,4 +1,4 @@
-# Bonfire — My Python Project Template
+# Bonfire — Otto's Python project template
 
 A [Copier](https://copier.readthedocs.io/) template for Python projects with modern tooling. Supports **standalone projects** and **monorepos** from a single template.
 
@@ -45,10 +45,10 @@ For monorepos, add or remove packages by modifying the `packages` list during `c
 
 | Option | Default | Description |
 |--------|---------|-------------|
-| `project_name` | — | Project name (e.g. `my-platform` or `my-library`) |
+| `project_name` | required | Project name (e.g. `my-platform` or `my-library`) |
 | `project_type` | `standalone` | Standalone project or monorepo |
 | `module_name` | derived from name | Python module name (standalone only) |
-| `packages` | — | List of package names as YAML (monorepo only, e.g. `[core, api]`) |
+| `packages` | required (if monorepo) | List of package names as YAML (monorepo only, e.g. `[core, api]`) |
 | `description` | `""` | Short project description |
 | `author_name` | `""` | Author name |
 | `author_email` | `""` | Author email |
@@ -92,12 +92,18 @@ my-project/
 my-platform/
 ├── core/
 │   ├── src/core/
+│   │   ├── __init__.py
+│   │   ├── log.py
+│   │   └── py.typed
 │   ├── tests/
 │   ├── CLAUDE.md
 │   ├── justfile
 │   └── pyproject.toml
 ├── api/
 │   ├── src/api/
+│   │   ├── __init__.py
+│   │   ├── log.py
+│   │   └── py.typed
 │   ├── tests/
 │   ├── CLAUDE.md
 │   ├── justfile
