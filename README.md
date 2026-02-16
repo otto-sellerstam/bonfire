@@ -9,6 +9,7 @@ A [Copier](https://copier.readthedocs.io/) template for Python projects with mod
 - **[Pyrefly](https://pyrefly.org/)** — Meta's Rust-based type checker in strict mode
 - **[Pytest](https://docs.pytest.org/)** — Testing with coverage enforcement (80% threshold)
 - **[Just](https://github.com/casey/just)** — Modern task runner (cleaner alternative to Make)
+- **[MkDocs Material](https://squidfun.github.io/mkdocs-material/)** — Documentation with auto-generated API references
 - **[Pre-commit](https://pre-commit.com/)** — Git hooks for lint + format on every commit
 - **CLAUDE.md** — AI assistant context file for Claude Code
 - **GitHub Actions** — Optional CI workflow
