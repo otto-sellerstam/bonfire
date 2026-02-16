@@ -1,0 +1,19 @@
+# {{ project_name }}
+
+{{ description or "A Python project." }}
+
+## Overview
+
+Welcome to the **{{ project_name }}** documentation.
+
+{% if project_type == "monorepo" -%}
+This project is organised as a monorepo with the following packages:
+
+{% for pkg in packages -%}
+- [**{{ pkg }}**]({{ pkg }}/overview.md) — `{{ pkg | replace('-', '_') }}`
+{% endfor %}
+{% endif -%}
+
+## Quick links
+
+- [Getting Started](getting-started.md) — installation and first steps

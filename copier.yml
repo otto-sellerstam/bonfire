@@ -1,27 +1,46 @@
-_min_copier_version: "9.0.0"
+_min_copier_version: "9.5.0"
 _subdirectory: template
+
 _exclude:
-  - "{% if not include_github_actions or is_subproject %}.github{% endif %}"
-  - "{% if is_subproject %}.github{% endif %}"
-  - "{% if is_subproject %}LICENSE.jinja{% endif %}"
-  - "{% if is_subproject %}.gitignore{% endif %}"
+  - "{% if not include_github_actions %}.github{% endif %}"
+  # In monorepo mode, exclude the standalone src/ and tests/ dirs (root only)
+  - "{% if project_type == 'monorepo' %}/src{% endif %}"
+  - "{% if project_type == 'monorepo' %}/tests{% endif %}"
+  # In standalone mode, exclude the root conftest.py (only needed for monorepo)
+  - "{% if project_type == 'standalone' %}/conftest.py{% endif %}"
 
 # ── Questions ───────────────────────────────────────────────────────────
 
 project_name:
   type: str
-  help: "Project name (e.g. my-awesome-project)"
+  help: "Project name (e.g. my-platform or my-library)"
   validator: "{% if not project_name %}Required{% endif %}"
 
-is_subproject:
-  type: bool
-  help: "Is this a sub-project in a monorepo?"
-  default: false
+project_type:
+  type: str
+  help: "What are you creating?"
+  default: "standalone"
+  choices:
+    "Standalone project (single package)": standalone
+    "Monorepo (multiple packages in one repo)": monorepo
 
+# For standalone mode: the single module name
 module_name:
   type: str
-  help: "Python module name (e.g. my_awesome_project)"
+  help: "Python module name (e.g. my_project)"
   default: "{{ project_name | lower | replace('-', '_') | replace(' ', '_') }}"
+  when: "{{ project_type == 'standalone' }}"
+
+# For monorepo mode: list of package names
+packages:
+  type: yaml
+  help: |
+    List of package names as a YAML list.
+    Example: [core, api, workers]
+    Each becomes a top-level directory with its own src/, tests/, etc.
+  when: "{{ project_type == 'monorepo' }}"
+  default: null
+  validator: "{% if project_type == 'monorepo' and packages is not none and packages | length == 0 %}At least one package is required{% endif %}"
 
 description:
   type: str
@@ -31,12 +50,13 @@ description:
 author_name:
   type: str
   help: "Author name"
-  default: "Otto"
+  default: ""
 
 author_email:
   type: str
   help: "Author email"
   default: ""
+  validator: "{% if author_email and '@' not in author_email %}Must be a valid email address (or leave empty).{% endif %}"
 
 python_version:
   type: str
@@ -61,4 +81,3 @@ include_github_actions:
   type: bool
   help: "Include GitHub Actions CI workflow?"
   default: true
-  when: "{{ not is_subproject }}"

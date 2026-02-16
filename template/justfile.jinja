@@ -2,22 +2,18 @@
 default:
     @just --list
 
-# ── Setup ───────────────────────────────────────────────────────────────
+### Setup ###############################################################
 
 # Install dependencies (dev included)
 install:
-    uv sync
+    uv sync{% if project_type == "monorepo" %} --all-packages{% endif %}
 
-# Install pre-commit hooks
-{% if not is_subproject -%}
+# Install pre-commit hooks and sync dependencies
 setup: install
     uv run pre-commit install
-{% else -%}
-# Install dependencies (alias for monorepo subprojects)
-setup: install
-{% endif %}
 
-# ── Code Quality ────────────────────────────────────────────────────────
+{% if project_type == "standalone" -%}
+### Code Quality ########################################################
 
 # Run Ruff linter
 lint:
@@ -39,7 +35,7 @@ format-check:
 typecheck:
     uv run pyrefly check
 
-# ── Testing ─────────────────────────────────────────────────────────────
+### Testing #############################################################
 
 # Run tests
 test:
@@ -47,21 +43,84 @@ test:
 
 # Run tests with coverage
 test-cov:
-    uv run pytest --cov={{ module_name }} --cov-report=term-missing --cov-report=html
+    uv run pytest --cov=src/{{ module_name }} --cov-report=term-missing --cov-report=html
 
 # Run tests with verbose output
 test-verbose:
     uv run pytest -v
 
-# ── Combined ────────────────────────────────────────────────────────────
+### Combined ############################################################
 
 # Run all checks (lint + format-check + typecheck + test)
 check: lint format-check typecheck test
 
-# ── Cleanup ─────────────────────────────────────────────────────────────
+{% else -%}
+### Code Quality (runs across all packages) #############################
+
+# Run Ruff linter across all packages
+lint:
+    uv run ruff check .
+
+# Run Ruff linter with auto-fix
+lint-fix:
+    uv run ruff check --fix .
+
+# Format code with Ruff
+format:
+    uv run ruff format .
+
+# Check formatting without changes
+format-check:
+    uv run ruff format --check .
+
+# Run Pyrefly type checker
+typecheck:
+    uv run pyrefly check
+
+### Testing #############################################################
+
+# Run all tests across all packages
+test:
+    uv run pytest
+
+# Run tests for a specific package
+test-pkg pkg:
+    uv run pytest {{ '{{pkg}}' }}/tests
+
+# Run tests with coverage (all packages)
+test-cov:
+    uv run pytest{% for pkg in packages %} --cov={{ pkg }}/src/{{ pkg | replace('-', '_') }}{% endfor %} --cov-report=term-missing --cov-report=html
+
+# Run tests with verbose output
+test-verbose:
+    uv run pytest -v
+
+### Combined ############################################################
+
+# Run all checks (lint + format-check + typecheck + test)
+check: lint format-check typecheck test
+
+{% endif -%}
+### Docs ###############################################################
+
+# Build documentation
+docs:
+    uv run --group docs mkdocs build
+
+# Serve documentation with live reload
+docs-serve:
+    uv run --group docs mkdocs serve -a localhost:8001
+
+### Maintenance ########################################################
+
+# Update project from template (keeps current settings)
+update:
+    copier update --defaults
+
+### Cleanup #############################################################
 
 # Remove build artifacts and caches
 clean:
-    rm -rf .ruff_cache .pytest_cache htmlcov .coverage dist build
+    rm -rf .ruff_cache .pytest_cache htmlcov .coverage dist build site
     find . -type d -name __pycache__ -exec rm -rf {} + 2>/dev/null || true
     find . -type d -name "*.egg-info" -exec rm -rf {} + 2>/dev/null || true
