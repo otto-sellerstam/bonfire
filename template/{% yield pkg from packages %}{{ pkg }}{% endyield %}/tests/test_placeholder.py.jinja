@@ -1,6 +1,6 @@
 """Placeholder tests — replace with real tests."""
 
-from {{ module_name }} import __version__
+from {{ pkg | replace('-', '_') }} import __version__
 
 
 def test_version() -> None:

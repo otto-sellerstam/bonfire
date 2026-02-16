@@ -1,0 +1,51 @@
+site_name: {{ project_name }}
+site_description: {{ description or "A Python project." }}
+
+theme:
+  name: material
+  palette:
+    - scheme: slate
+      primary: deep purple
+      accent: deep purple
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+    - scheme: default
+      primary: deep purple
+      accent: deep purple
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+  features:
+    - content.code.copy
+    - navigation.indexes
+    - navigation.sections
+    - search.suggest
+
+plugins:
+  - search
+  - gen-files:
+      scripts:
+        - docs/scripts/gen_ref_pages.py
+  - literate-nav:
+      nav_file: SUMMARY.md
+  - mkdocstrings:
+      handlers:
+        python:
+{% if project_type == "standalone" %}          paths: [src]
+{% else %}          paths:
+{% for pkg in packages %}            - {{ pkg }}/src
+{% endfor %}{% endif %}          options:
+            show_source: true
+            show_root_heading: true
+            members_order: source
+            docstring_style: google
+            # Uncomment to include private (_prefixed) members in the docs:
+            # filters: ["!^__"]
+
+nav:
+  - Overview: index.md
+  - Getting Started: getting-started.md
+{% if project_type == "monorepo" %}{% for pkg in packages %}  - "{{ pkg }}":
+      - Overview: {{ pkg }}/overview.md
+{% endfor %}{% endif %}  - API Reference: api/

@@ -1,0 +1,13 @@
+{% if project_type == "monorepo" -%}
+"""Root conftest — pre-import workspace packages.
+
+Without this, pytest's directory traversal registers package directories
+(e.g. core/) as namespace packages before test collection, which shadows the
+real packages installed from <pkg>/src/.  Importing them here (while
+pythonpath is already in effect) caches the correct module in sys.modules.
+"""
+
+{% for pkg in packages | sort -%}
+import {{ pkg | replace('-', '_') }}  # noqa: F401
+{% endfor -%}
+{% endif -%}
