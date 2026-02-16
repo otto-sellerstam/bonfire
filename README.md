@@ -1,10 +1,10 @@
-# Python Project Template
+# Bonfire — My Python Project Template
 
-A [Copier](https://copier.readthedocs.io/) template for Python projects with modern tooling.
+A [Copier](https://copier.readthedocs.io/) template for Python projects with modern tooling. Supports **standalone projects** and **monorepos** from a single template.
 
-## What You Get
+## What's included
 
-- **[uv](https://docs.astral.sh/uv/)** — Blazing-fast package & environment management
+- **[uv](https://docs.astral.sh/uv/)** — Package & environment management (with workspace support for monorepos)
 - **[Ruff](https://docs.astral.sh/ruff/)** — All lint rules enabled + formatting (replaces Black, Flake8, isort, etc.)
 - **[Pyrefly](https://pyrefly.org/)** — Meta's Rust-based type checker in strict mode
 - **[Pytest](https://docs.pytest.org/)** — Testing with coverage enforcement (80% threshold)
@@ -22,52 +22,56 @@ A [Copier](https://copier.readthedocs.io/) template for Python projects with mod
 # Install copier (one-time)
 uv tool install copier
 
-# Generate a new project
-copier copy gh:YOUR_USERNAME/python-template my-new-project
+# Generate a standalone project
+copier copy gh:ottosellerstam/bonfire my-new-project
 
-# Or use the latest unreleased version
-copier copy --vcs-ref=HEAD gh:YOUR_USERNAME/python-template my-new-project
+# Generate a monorepo (select "monorepo" when prompted)
+copier copy gh:ottosellerstam/bonfire my-platform
 ```
 
 ### Update an existing project
 
-When you improve this template, existing projects can pull in the changes:
+Existing projects can pull in the changes by:
 
 ```bash
 cd my-existing-project
 copier update
 ```
 
-Copier will intelligently merge template changes, flagging conflicts for manual resolution.
+Copier will merge template changes, flagging conflicts for manual resolution.
 
-## Template Options
+For monorepos, add or remove packages by modifying the `packages` list during `copier update`.
+
+## Template options
 
 | Option | Default | Description |
 |--------|---------|-------------|
-| `project_name` | — | Project name (e.g. `my-awesome-project`) |
-| `module_name` | derived from name | Python module name |
+| `project_name` | — | Project name (e.g. `my-platform` or `my-library`) |
+| `project_type` | `standalone` | Standalone project or monorepo |
+| `module_name` | derived from name | Python module name (standalone only) |
+| `packages` | — | List of package names as YAML (monorepo only, e.g. `[core, api]`) |
 | `description` | `""` | Short project description |
-| `author_name` | `Otto` | Author name |
+| `author_name` | `""` | Author name |
 | `author_email` | `""` | Author email |
-| `python_version` | `3.12` | Minimum Python version (3.11/3.12/3.13) |
+| `python_version` | `3.12` | Minimum Python version (3.11–3.14) |
 | `license` | `MIT` | License (MIT/Apache-2.0/Proprietary) |
 | `include_github_actions` | `true` | Include GitHub Actions CI workflow |
 
-## Generated Project Structure
+## Generated structures
+
+### Standalone
 
 ```
 my-project/
-├── .github/
-│   └── workflows/
-│       └── ci.yml
 ├── src/
 │   └── my_project/
 │       ├── __init__.py
+│       ├── logging.py
 │       └── py.typed
 ├── tests/
-│   ├── __init__.py
 │   ├── conftest.py
 │   └── test_placeholder.py
+├── .github/workflows/ci.yml
 ├── .copier-answers.yml
 ├── .gitignore
 ├── .pre-commit-config.yaml
@@ -79,36 +83,64 @@ my-project/
 └── pyproject.toml
 ```
 
-## Tool Configuration Philosophy
+### Monorepo
 
-Everything lives in `pyproject.toml`. No scattered config files.
+```
+my-platform/
+├── core/
+│   ├── src/core/
+│   ├── tests/
+│   ├── CLAUDE.md
+│   ├── justfile
+│   └── pyproject.toml
+├── api/
+│   ├── src/api/
+│   ├── tests/
+│   ├── CLAUDE.md
+│   ├── justfile
+│   └── pyproject.toml
+├── .github/workflows/ci.yml
+├── .copier-answers.yml
+├── .gitignore
+├── .pre-commit-config.yaml
+├── .python-version
+├── CLAUDE.md
+├── LICENSE
+├── README.md
+├── justfile
+└── pyproject.toml          # Workspace root: shared tool config + dev deps
+```
 
-### Ruff: ALL Rules Enabled
+## Config philosophy
 
-We use `select = ["ALL"]` and explicitly ignore only rules that:
-- Conflict with the Ruff formatter (14 rules)
-- Conflict with each other (e.g. D203 vs D211)
-- Are deprecated (ANN101/ANN102)
-- Are too noisy for practical use (ERA001, TD003, FIX002)
+### Standalone
 
-Tests get relaxed rules via `per-file-ignores` (no docstrings, no type annotations, asserts allowed, etc.).
+Everything lives in a single `pyproject.toml` — project metadata, build system, and all tool configuration.
 
-### Pyrefly: Strict Mode
+### Monorepo
 
-Pyrefly's default is already strict — it checks all function bodies and infers return types (`check-and-infer-return-type`). We additionally enable:
-- `missing-return-annotation = true`
-- `missing-override-decorator = true`
+Config is split based on how each tool resolves settings:
 
-> **Note:** Pyrefly is currently in beta (v0.50+). It's very fast and actively developed, but you may encounter false positives with some libraries. Use `# pyrefly: ignore` for suppression.
+- **Root `pyproject.toml`**: Workspace definition, shared dev dependencies, Ruff rules, Pyrefly settings, Pytest options, coverage thresholds
+- **Package `pyproject.toml`**: Only package metadata, build system, and per-package `[tool.coverage.run]`
+- Sub-packages **inherit** Ruff/Pyrefly/Pytest config from root automatically (no duplication)
 
-### Coverage: 80% Threshold
+### Ruff: ALL rules enabled
 
-Coverage is configured with `fail_under = 80` and branch coverage enabled. Common exclusion patterns (`TYPE_CHECKING`, `@overload`, `__main__`) are pre-configured.
+We use `select = ["ALL"]` and explicitly ignore only rules that conflict with the formatter, conflict with each other, are deprecated, or are too noisy for practical use. Tests get relaxed rules via `per-file-ignores`.
 
-## Why Copier over Cookiecutter?
+### Pyrefly: strict mode
 
-Copier supports **updating existing projects** when the template evolves. Change the template → run `copier update` in your projects → changes propagate. Cookiecutter is fire-and-forget. The `.copier-answers.yml` file tracks which template version and answers were used, making updates seamless.
+Pyrefly's default is already strict. We additionally enable `missing-return-annotation` and `missing-override-decorator`.
 
-## Why Just over Make?
+> **Note:** Pyrefly is in beta. Use `# pyrefly: ignore` for false positive suppression.
 
-Just is a purpose-built task runner with sane syntax (spaces, not tabs), recipe arguments, better error messages, and no `.PHONY` boilerplate. See the [Just README](https://github.com/casey/just) for a full comparison.
+### Coverage: 80% threshold
+
+Coverage uses `fail_under = 80` with branch coverage. Common exclusion patterns (`TYPE_CHECKING`, `@overload`, `__main__`) are pre-configured.
+
+## Requirements
+
+- [Copier](https://copier.readthedocs.io/) ≥ 9.5.0 (for `{% yield %}` monorepo support)
+- [uv](https://docs.astral.sh/uv/) (for dependency management)
+- [Just](https://github.com/casey/just) (for task running)

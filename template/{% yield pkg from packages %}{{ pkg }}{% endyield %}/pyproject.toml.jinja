@@ -1,0 +1,30 @@
+[project]
+name = "{{ pkg }}"
+version = "0.1.0"
+description = ""
+requires-python = ">={{ python_version }}"
+{% if license != "Proprietary" -%}
+license = { text = "{{ license }}" }
+{% endif -%}
+{% if author_name -%}
+authors = [
+    { name = "{{ author_name }}"{% if author_email %}, email = "{{ author_email }}"{% endif %} },
+]
+{% endif -%}
+dependencies = [
+    "structlog>=24.0",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/{{ pkg | replace('-', '_') }}"]
+
+# ── Coverage (per-package source) ───────────────────────────────────────
+# Other coverage settings (fail_under, exclude_lines) are in root pyproject.toml.
+
+[tool.coverage.run]
+source = ["{{ pkg | replace('-', '_') }}"]
+branch = true
