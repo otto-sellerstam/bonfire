@@ -10,9 +10,8 @@ A [Copier](https://copier.readthedocs.io/) template for Python projects with mod
 - **[Pytest](https://docs.pytest.org/)** — Testing with coverage enforcement (80% threshold)
 - **[Just](https://github.com/casey/just)** — Modern task runner (cleaner alternative to Make)
 - **[Pre-commit](https://pre-commit.com/)** — Git hooks for lint + format on every commit
-- **CLAUDE.md** — AI assistant context file for Claude Code / Claude chat
+- **CLAUDE.md** — AI assistant context file for Claude Code
 - **GitHub Actions** — Optional CI workflow
-- **src/ layout** — [Recommended project structure](https://packaging.python.org/en/latest/discussions/src-layout-vs-flat-layout/)
 
 ## Usage
 
@@ -23,10 +22,10 @@ A [Copier](https://copier.readthedocs.io/) template for Python projects with mod
 uv tool install copier
 
 # Generate a standalone project
-copier copy gh:ottosellerstam/bonfire my-new-project
+copier copy gh:otto-sellerstam/bonfire my-new-project
 
 # Generate a monorepo (select "monorepo" when prompted)
-copier copy gh:ottosellerstam/bonfire my-platform
+copier copy gh:otto-sellerstam/bonfire my-platform
 ```
 
 ### Update an existing project
