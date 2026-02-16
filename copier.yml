@@ -1,7 +1,7 @@
 _min_copier_version: "9.0.0"
 _subdirectory: template
 _exclude:
-  - "{% if not include_github_actions %}.github{% endif %}"
+  - "{% if not include_github_actions or is_subproject %}.github{% endif %}"
   - "{% if is_subproject %}.github{% endif %}"
   - "{% if is_subproject %}LICENSE.jinja{% endif %}"
   - "{% if is_subproject %}.gitignore{% endif %}"
@@ -46,6 +46,7 @@ python_version:
     - "3.11"
     - "3.12"
     - "3.13"
+    - "3.14"
 
 license:
   type: str

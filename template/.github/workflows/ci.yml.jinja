@@ -16,20 +16,14 @@ jobs:
       - name: Install uv
         uses: astral-sh/setup-uv@v4
 
+      - name: Install just
+        uses: extractions/setup-just@v2
+
       - name: Set up Python
         run: uv python install {{ python_version }}
 
       - name: Install dependencies
-        run: uv sync
+        run: just install
 
-      - name: Lint
-        run: uv run ruff check .
-
-      - name: Check formatting
-        run: uv run ruff format --check .
-
-      - name: Type check
-        run: uv run pyrefly check
-
-      - name: Test with coverage
-        run: uv run pytest --cov={{ module_name }} --cov-report=term-missing
+      - name: Run all checks
+        run: just check
