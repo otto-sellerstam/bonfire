@@ -61,3 +61,4 @@ include_github_actions:
   type: bool
   help: "Include GitHub Actions CI workflow?"
   default: true
+  when: "{{ not is_subproject }}"
